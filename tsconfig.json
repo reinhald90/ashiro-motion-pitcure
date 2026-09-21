@@ -1,0 +1,111 @@
+{
+  "compilerOptions": {
+    // ============================================
+    // Target & Library
+    // ============================================
+    "target": "ES2022",
+    "lib": ["dom", "dom.iterable", "esnext", "webworker"],
+    "module": "esnext",
+    "moduleResolution": "bundler",
+
+    // ============================================
+    // JavaScript Support
+    // ============================================
+    "allowJs": true,
+    "checkJs": false,
+
+    // ============================================
+    // Emit
+    // ============================================
+    "noEmit": true,
+    "incremental": true,
+    "tsBuildInfoFile": ".next/cache/tsconfig.tsbuildinfo",
+
+    // ============================================
+    // Type Checking — Strict
+    // ============================================
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+
+    // ============================================
+    // Additional Checks
+    // ============================================
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "forceConsistentCasingInFileNames": true,
+
+    // ============================================
+    // Interop
+    // ============================================
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+
+    // ============================================
+    // JSX (Next.js)
+    // ============================================
+    "jsx": "preserve",
+
+    // ============================================
+    // Next.js Plugin
+    // ============================================
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+
+    // ============================================
+    // Path Aliases
+    // ============================================
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"],
+      "@components/*": ["./components/*"],
+      "@lib/*": ["./lib/*"],
+      "@hooks/*": ["./hooks/*"],
+      "@stores/*": ["./stores/*"],
+      "@types/*": ["./types/*"],
+      "@utils/*": ["./lib/utils/*"],
+      "@effects/*": ["./lib/effects/*"],
+      "@editor/*": ["./lib/editor/*"]
+    },
+
+    // ============================================
+    // Skip lib check (biar build cepat)
+    // ============================================
+    "skipLibCheck": true
+  },
+
+  // ============================================
+  // Files yang dicek
+  // ============================================
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts"
+  ],
+
+  // ============================================
+  // Files yang diabaikan
+  // ============================================
+  "exclude": [
+    "node_modules",
+    ".next",
+    "out",
+    "dist",
+    "build",
+    "public"
+  ]
+}
