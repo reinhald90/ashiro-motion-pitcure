@@ -1,6 +1,15 @@
 'use client';
 
-import { Trash2, Eye, EyeOff, Lock, Unlock, Image as ImageIcon, Square, Type } from 'lucide-react';
+import {
+  Trash2,
+  Eye,
+  EyeOff,
+  Lock,
+  Unlock,
+  Image as ImageIcon,
+  Square,
+  Type,
+} from 'lucide-react';
 import { useEditorStore } from '@/stores/editorStore';
 import type { Layer } from '@/types/layer';
 
@@ -12,7 +21,6 @@ export default function LayersPanel() {
   const toggleVisibility = useEditorStore((s) => s.toggleVisibility);
   const toggleLock = useEditorStore((s) => s.toggleLock);
 
-  // Urutan terbalik: layer atas tampil di atas
   const reversed = [...layers].reverse();
 
   return (
@@ -22,14 +30,14 @@ export default function LayersPanel() {
     >
       <div className="editor-panel-header">
         <span>Layers</span>
-        <span className="font-mono text-[10px] text-ink-500">{layers.length}</span>
+        <span className="font-mono text-[10px] text-ink-500">
+          {layers.length}
+        </span>
       </div>
 
       <div className="flex-1 overflow-y-auto">
         {reversed.length === 0 && (
-          <p className="p-4 text-center text-xs text-ink-500">
-            Belum ada layer
-          </p>
+          <p className="p-4 text-center text-xs text-ink-500">Belum ada layer</p>
         )}
 
         {reversed.map((layer) => (
@@ -85,7 +93,11 @@ function LayerRow({
         className="text-ink-400 hover:text-white"
         title="Visibilitas"
       >
-        {layer.visible ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
+        {layer.visible ? (
+          <Eye className="h-3.5 w-3.5" />
+        ) : (
+          <EyeOff className="h-3.5 w-3.5" />
+        )}
       </button>
 
       <div className="flex h-7 w-7 items-center justify-center rounded bg-white/5">
@@ -102,7 +114,11 @@ function LayerRow({
         className="text-ink-400 hover:text-white opacity-0 group-hover:opacity-100"
         title="Kunci"
       >
-        {layer.locked ? <Lock className="h-3.5 w-3.5" /> : <Unlock className="h-3.5 w-3.5" />}
+        {layer.locked ? (
+          <Lock className="h-3.5 w-3.5" />
+        ) : (
+          <Unlock className="h-3.5 w-3.5" />
+        )}
       </button>
 
       <button
