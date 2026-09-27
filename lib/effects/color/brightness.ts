@@ -1,7 +1,3 @@
-// ============================================
-// lib/effects/color/brightness.ts
-// Efek: Brightness (Kecerahan)
-// ============================================
 
 import type { EffectDefinition } from '@effects/_base';
 import { number, resetCtx, supportsCanvasFilter } from '@effects/_base';
@@ -18,7 +14,7 @@ const brightness: EffectDefinition = {
     amount: number('Brightness', 100, 0, 200, {
       step: 1,
       unit: '%',
-      description: '100% = normal. Di bawah 100% menggelap, di atas 100% mencerah.',
+      description: '100% = normal.',
     }),
   },
 
@@ -26,7 +22,6 @@ const brightness: EffectDefinition = {
 
   apply({ ctx, source, width, height, params }) {
     const amount = typeof params.amount === 'number' ? params.amount : 100;
-
     ctx.filter = `brightness(${amount}%)`;
     ctx.drawImage(source, 0, 0, width, height);
     resetCtx(ctx);
