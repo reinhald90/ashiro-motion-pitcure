@@ -1,3 +1,4 @@
+
 // ============================================
 // lib/effects/_base.ts
 // Template + helper untuk efek Ashiro
@@ -15,7 +16,7 @@ import type {
   BooleanParam,
   SelectParam,
   ColorParam,
-} from '@types/effect';
+} from '@/types/effect';
 
 // ============================================
 // Re-export tipe (biar efek lain import dari sini saja)
@@ -96,8 +97,6 @@ export function color(
 // ============================================
 // Helper: render ke canvas sementara (scratch canvas)
 // ============================================
-// Berguna untuk efek yang butuh "bahan" sebelum di-draw ke ctx utama.
-// ============================================
 
 let scratchCanvas: HTMLCanvasElement | null = null;
 
@@ -127,10 +126,6 @@ export function clearCanvas(
 // ============================================
 // Helper: reset filter & state ctx
 // ============================================
-// Selalu panggil ini setelah selesai menggambar
-// biar efek berikutnya tidak terpengaruh.
-// ============================================
-
 export function resetCtx(ctx: CanvasRenderingContext2D): void {
   ctx.filter = 'none';
   ctx.globalAlpha = 1;
@@ -196,9 +191,6 @@ export function hexToRgba(hex: string, alpha = 1): string {
 // ============================================
 // Helper: cek dukungan browser untuk efek
 // ============================================
-// Contoh: ctx.filter tidak didukung Safari versi lama.
-// ============================================
-
 let cachedSupportsFilter: boolean | null = null;
 
 export function supportsCanvasFilter(): boolean {
@@ -213,93 +205,9 @@ export function supportsCanvasFilter(): boolean {
     return false;
   }
 
-  // Coba set filter, cek apakah diterapkan
   ctx.filter = 'blur(2px)';
   cachedSupportsFilter = ctx.filter !== 'none';
   return cachedSupportsFilter;
 }
-
-// ============================================
-// Template — copy-paste untuk efek baru
-// ============================================
-/*
-import type { EffectDefinition } from '@effects/_base';
-import { number, supportsCanvasFilter } from '@effects/_base';
-
-const myEffect: EffectDefinition = {
-  id: 'my-effect',
-  name: 'My Effect',
-  category: 'stylize',
-  icon: '✨',
-  description: 'Deskripsi singkat efek ini',
-
-  params: {
-    amount: number('Amount', 50, 0, 100, { unit: '%' }),
-  },
-
-  isSupported() {
-    return supportsCanvasFilter();
-  },
-
-  apply({ ctx, source, width, height, params }) {
-    // 1. Reset dulu biar bersih
-    // 2. Terapkan efek
-    // 3. Reset lagi (opsional, tapi disarankan)
-    // Lihat contoh di lib/effects/color/brightness.ts
-  },
-};
-
-export default myEffect;
-*/
-
-// ============================================
-// Info: cara bikin efek baru
-// ============================================
-/*
-LANGKAH-LANGKAH:
-
-1. Buat file di lib/effects/<kategori>/<nama>.ts
-   Contoh: lib/effects/color/brightness.ts
-
-2. Copy template di atas, ubah:
-   - id: kebab-case, unik
-   - name: nama tampil
-   - category: 'color' | 'blur' | 'distort' | 'stylize' | 'light' | 'transition'
-   - icon: emoji
-   - params: pakai helper number() / bool() / select() / color()
-   - apply(): logic render
-
-3. Daftarkan di lib/effects/_registry.ts:
-   - import myEffect from './color/my-effect';
-   - tambahkan ke array EFFECTS
-
-4. UI panel efek auto-detect. Selesai.
-
-ATURAN apply():
-
-- Selalu gambar ke ctx (context tujuan)
-- Ambil input dari source (canvas sumber)
-- Jangan ubah source
-- Reset ctx setelah selesai (pakai resetCtx)
-- Kalau butuh canvas bantu, pakai getScratchCanvas()
-- Jangan panggil apply() dari apply() efek lain — itu tugas renderer
-
-CONTOH AMAN:
-
-apply({ ctx, source, width, height, params }) {
-  ctx.filter = `blur(${params.radius}px)`;
-  ctx.drawImage(source, 0, 0, width, height);
-  resetCtx(ctx);
-}
-
-CONTOH SALAH:
-
-apply({ ctx, source }) {
-  // ❌ lupa reset filter
-  ctx.filter = `blur(10px)`;
-  ctx.drawImage(source, 0, 0);
-}
-// Akibatnya: efek berikutnya kebawa blur
-*/
 
 export {};
