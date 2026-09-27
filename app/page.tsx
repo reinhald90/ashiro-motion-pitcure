@@ -1,20 +1,17 @@
-import Link from 'next/image';
+import Link from 'next/link';
 import {
   Sparkles,
   Layers,
   KeyRound,
   Music2,
   Zap,
-  Download,
   Play,
   ArrowRight,
   Check,
-  Smartphone,
   Monitor,
   Wand2,
   Film,
   Palette,
-  Type,
 } from 'lucide-react';
 
 // ============================================
@@ -180,10 +177,8 @@ export default function HomePage() {
           Hero
           ============================================ */}
       <section className="relative pt-32 pb-20 md:pt-40 md:pb-32">
-        {/* Background grid */}
         <div className="bg-canvas-grid absolute inset-0 opacity-40" />
 
-        {/* Gradient orbs */}
         <div className="absolute left-1/4 top-0 h-96 w-96 -translate-x-1/2 rounded-full bg-ashiro-500/20 blur-[120px]" />
         <div className="absolute right-1/4 top-40 h-96 w-96 translate-x-1/2 rounded-full bg-neon-500/20 blur-[120px]" />
 
@@ -261,7 +256,6 @@ export default function HomePage() {
                       </div>
                     </div>
                   </div>
-                  {/* Playhead */}
                   <div className="absolute left-1/2 top-0 h-full w-px bg-neon-500 shadow-glow-neon" />
                 </div>
 
@@ -311,7 +305,6 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Glow under */}
             <div className="absolute -inset-x-20 -bottom-20 h-40 bg-gradient-to-t from-ashiro-500/20 to-transparent blur-2xl" />
           </div>
         </div>
@@ -453,9 +446,7 @@ export default function HomePage() {
               <div
                 key={plan.name}
                 className={`card relative ${
-                  plan.highlight
-                    ? 'border-ashiro-500/50 shadow-glow'
-                    : ''
+                  plan.highlight ? 'border-ashiro-500/50 shadow-glow' : ''
                 }`}
               >
                 {plan.highlight && (
@@ -568,27 +559,63 @@ export default function HomePage() {
             <div>
               <h4 className="font-display text-sm font-bold">Produk</h4>
               <ul className="mt-4 space-y-2 text-sm text-ink-400">
-                <li><Link href="/editor" className="hover:text-white">Editor</Link></li>
-                <li><a href="#features" className="hover:text-white">Fitur</a></li>
-                <li><a href="#pricing" className="hover:text-white">Harga</a></li>
+                <li>
+                  <Link href="/editor" className="hover:text-white">
+                    Editor
+                  </Link>
+                </li>
+                <li>
+                  <a href="#features" className="hover:text-white">
+                    Fitur
+                  </a>
+                </li>
+                <li>
+                  <a href="#pricing" className="hover:text-white">
+                    Harga
+                  </a>
+                </li>
               </ul>
             </div>
 
             <div>
               <h4 className="font-display text-sm font-bold">Sumber</h4>
               <ul className="mt-4 space-y-2 text-sm text-ink-400">
-                <li><a href="/docs" className="hover:text-white">Dokumentasi</a></li>
-                <li><a href="/blog" className="hover:text-white">Blog</a></li>
-                <li><a href="/changelog" className="hover:text-white">Changelog</a></li>
+                <li>
+                  <a href="/docs" className="hover:text-white">
+                    Dokumentasi
+                  </a>
+                </li>
+                <li>
+                  <a href="/blog" className="hover:text-white">
+                    Blog
+                  </a>
+                </li>
+                <li>
+                  <a href="/changelog" className="hover:text-white">
+                    Changelog
+                  </a>
+                </li>
               </ul>
             </div>
 
             <div>
               <h4 className="font-display text-sm font-bold">Perusahaan</h4>
               <ul className="mt-4 space-y-2 text-sm text-ink-400">
-                <li><a href="/about" className="hover:text-white">Tentang</a></li>
-                <li><a href="/contact" className="hover:text-white">Kontak</a></li>
-                <li><a href="/privacy" className="hover:text-white">Privasi</a></li>
+                <li>
+                  <a href="/about" className="hover:text-white">
+                    Tentang
+                  </a>
+                </li>
+                <li>
+                  <a href="/contact" className="hover:text-white">
+                    Kontak
+                  </a>
+                </li>
+                <li>
+                  <a href="/privacy" className="hover:text-white">
+                    Privasi
+                  </a>
+                </li>
               </ul>
             </div>
           </div>
@@ -596,10 +623,13 @@ export default function HomePage() {
           <div className="divider mt-12" />
 
           <div className="flex flex-col items-center justify-between gap-4 text-xs text-ink-500 md:flex-row">
-            <p>© {new Date().getFullYear()} Ashiro Motion Picture. All rights reserved.</p>
+            <p>
+              © {new Date().getFullYear()} Ashiro Motion Picture. All rights
+              reserved.
+            </p>
             <div className="flex items-center gap-2">
               <Monitor className="h-3 w-3" />
-              <span>Made by Azure</span>
+              <span>Dibuat dengan Next.js + Vercel</span>
             </div>
           </div>
         </div>
