@@ -1,6 +1,5 @@
 'use client';
 
-import { useRef } from 'react';
 import { useEditorStore } from '@/stores/editorStore';
 import type { Layer, ImageLayer, ShapeLayer, TextLayer } from '@/types/layer';
 import { isImageLayer, isShapeLayer, isTextLayer } from '@/types/layer';
@@ -13,11 +12,11 @@ export default function Canvas() {
   const selectedLayerId = useEditorStore((s) => s.project.selectedLayerId);
   const selectLayer = useEditorStore((s) => s.selectLayer);
 
-  const canvasAspect = project.settings.canvas.width / project.settings.canvas.height;
+  const canvasAspect =
+    project.settings.canvas.width / project.settings.canvas.height;
 
   return (
     <main className="relative flex min-w-0 flex-1 items-center justify-center bg-canvas-grid overflow-hidden">
-      {/* Canvas panggung */}
       <div
         className="relative bg-ink-950 shadow-2xl"
         style={{
@@ -28,7 +27,6 @@ export default function Canvas() {
         }}
         onClick={() => selectLayer(null)}
       >
-        {/* Render setiap layer */}
         {project.layers.map((layer) => (
           <LayerView
             key={layer.id}
@@ -37,7 +35,6 @@ export default function Canvas() {
           />
         ))}
 
-        {/* Empty state */}
         {project.layers.length === 0 && (
           <div className="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none">
             <div className="mb-3 text-4xl">🎬</div>
@@ -51,7 +48,6 @@ export default function Canvas() {
         )}
       </div>
 
-      {/* Zoom indicator */}
       <div className="absolute bottom-4 right-4 rounded-md border border-white/5 bg-ink-900/80 px-2 py-1 font-mono text-[10px] text-ink-400 backdrop-blur">
         100%
       </div>
@@ -164,7 +160,6 @@ function ShapeLayerView({ layer }: { layer: ShapeLayer }) {
     );
   }
 
-  // rectangle (default)
   return <div style={{ ...base, borderRadius }} />;
 }
 
