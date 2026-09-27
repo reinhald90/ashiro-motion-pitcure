@@ -581,19 +581,19 @@ export default function HomePage() {
               <h4 className="font-display text-sm font-bold">Sumber</h4>
               <ul className="mt-4 space-y-2 text-sm text-ink-400">
                 <li>
-                  <a href="/docs" className="hover:text-white">
+                  <Link href="/docs" className="hover:text-white">
                     Dokumentasi
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="/blog" className="hover:text-white">
+                  <Link href="/blog" className="hover:text-white">
                     Blog
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="/changelog" className="hover:text-white">
+                  <Link href="/changelog" className="hover:text-white">
                     Changelog
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </div>
@@ -602,18 +602,33 @@ export default function HomePage() {
               <h4 className="font-display text-sm font-bold">Perusahaan</h4>
               <ul className="mt-4 space-y-2 text-sm text-ink-400">
                 <li>
-                  <a href="/about" className="hover:text-white">
+                  <Link href="/about" className="hover:text-white">
                     Tentang
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="/contact" className="hover:text-white">
+                  <Link href="/contact" className="hover:text-white">
                     Kontak
+                  </Link>
+                </li>
+                <li>
+                  <a
+                    href="https://t.me/AzureLyount"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-white"
+                  >
+                    Telegram
                   </a>
                 </li>
                 <li>
-                  <a href="/privacy" className="hover:text-white">
-                    Privasi
+                  <a
+                    href="https://whatsapp.com/channel/0029VbDz1xsEQIau8FQEtF16"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-white"
+                  >
+                    WhatsApp
                   </a>
                 </li>
               </ul>
