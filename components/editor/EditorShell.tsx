@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import Image from 'next/image';
 import { ImagePlus, Square, Circle, Type, Play, Undo, Redo, Download } from 'lucide-react';
 import { useEditorStore } from '@/stores/editorStore';
 import Canvas from './Canvas';
@@ -21,7 +22,6 @@ export default function EditorShell() {
     };
   }, []);
 
-  // Handle upload file
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
@@ -31,7 +31,6 @@ export default function EditorShell() {
         const src = URL.createObjectURL(file);
         addImageLayer(file, src);
       }
-      // Video nanti
     }
 
     e.target.value = '';
@@ -43,7 +42,6 @@ export default function EditorShell() {
 
   return (
     <div className="flex h-screen w-screen flex-col overflow-hidden bg-ink-950 text-white">
-      {/* Hidden file input */}
       <input
         ref={fileInputRef}
         type="file"
@@ -53,18 +51,20 @@ export default function EditorShell() {
         className="hidden"
       />
 
-      {/* ============================================
-          Top Toolbar
-          ============================================ */}
+      {/* Top Toolbar */}
       <header
         className="flex shrink-0 items-center justify-between border-b border-white/5 bg-ink-900 px-4"
         style={{ height: 'var(--toolbar-height)' }}
       >
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
-            <div className="flex h-6 w-6 items-center justify-center rounded bg-gradient-ashiro">
-              <span className="font-display text-[10px] font-bold">A</span>
-            </div>
+            <Image
+              src="/logo.jpg"
+              alt="Ashiro"
+              width={24}
+              height={24}
+              className="rounded object-cover"
+            />
             <span className="font-display text-xs font-bold tracking-widest">
               ASHIRO
             </span>
@@ -98,11 +98,8 @@ export default function EditorShell() {
         </div>
       </header>
 
-      {/* ============================================
-          Middle Row
-          ============================================ */}
+      {/* Middle Row */}
       <div className="flex min-h-0 flex-1">
-        {/* Left Toolbar */}
         <aside
           className="flex shrink-0 flex-col items-center gap-1 border-r border-white/5 bg-ink-900 py-3"
           style={{ width: 'var(--toolbar-left-width)' }}
@@ -129,16 +126,11 @@ export default function EditorShell() {
           />
         </aside>
 
-        {/* Canvas */}
         <Canvas />
-
-        {/* Right Panel — Layers */}
         <LayersPanel />
       </div>
 
-      {/* ============================================
-          Bottom — Timeline
-          ============================================ */}
+      {/* Timeline */}
       <section
         className="shrink-0 border-t border-white/5 bg-ink-900"
         style={{ height: 'var(--timeline-height)' }}
@@ -209,4 +201,4 @@ function ToolButton({
       </span>
     </button>
   );
-}
+        }
