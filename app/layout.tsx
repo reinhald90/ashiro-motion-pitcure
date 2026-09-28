@@ -2,9 +2,6 @@ import type { Metadata, Viewport } from 'next';
 import { Inter, JetBrains_Mono, Space_Grotesk } from 'next/font/google';
 import './globals.css';
 
-// ============================================
-// Font
-// ============================================
 const inter = Inter({
   subsets: ['latin'],
   variable: '--font-sans',
@@ -23,9 +20,6 @@ const spaceGrotesk = Space_Grotesk({
   display: 'swap',
 });
 
-// ============================================
-// Metadata
-// ============================================
 export const metadata: Metadata = {
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_SITE_URL ?? 'https://ashiro-motion-picture.vercel.app'
@@ -52,7 +46,6 @@ export const metadata: Metadata = {
   ],
   category: 'Design Tools',
 
-  // Open Graph
   openGraph: {
     type: 'website',
     locale: 'id_ID',
@@ -63,7 +56,7 @@ export const metadata: Metadata = {
       'Editor motion graphics dan video berbasis web. Keyframe, efek, dan export MP4/GIF langsung dari browser.',
     images: [
       {
-        url: '/og-image.png',
+        url: '/title.jpg',
         width: 1200,
         height: 630,
         alt: 'Ashiro Motion Picture',
@@ -71,24 +64,20 @@ export const metadata: Metadata = {
     ],
   },
 
-  // Twitter
   twitter: {
     card: 'summary_large_image',
     title: 'Ashiro Motion Picture',
     description: 'Motion graphics & video editor di browser.',
-    images: ['/og-image.png'],
+    images: ['/title.jpg'],
   },
 
-  // Icons
   icons: {
     icon: [
-      { url: '/favicon.ico' },
-      { url: '/icon.svg', type: 'image/svg+xml' },
+      { url: '/logo.jpg' },
     ],
-    apple: '/apple-touch-icon.png',
+    apple: '/logo.jpg',
   },
 
-  // Robots
   robots: {
     index: true,
     follow: true,
@@ -101,10 +90,6 @@ export const metadata: Metadata = {
     },
   },
 
-  // Manifest
-  manifest: '/manifest.webmanifest',
-
-  // Format detection
   formatDetection: {
     email: false,
     address: false,
@@ -112,9 +97,6 @@ export const metadata: Metadata = {
   },
 };
 
-// ============================================
-// Viewport
-// ============================================
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
@@ -127,9 +109,6 @@ export const viewport: Viewport = {
   colorScheme: 'dark',
 };
 
-// ============================================
-// Root Layout
-// ============================================
 export default function RootLayout({
   children,
 }: Readonly<{
