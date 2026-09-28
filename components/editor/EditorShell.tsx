@@ -24,6 +24,7 @@ import {
   Plus,
   Clock,
   Layers as LayersIcon,
+  Sliders,
   Trash2,
   Eye,
   EyeOff,
@@ -31,16 +32,21 @@ import {
 import { useEditorStore } from '@/stores/editorStore';
 import type { ShapeKind } from '@/types/layer';
 import Canvas from './Canvas';
+import PropertiesPanel from './PropertiesPanel';
 
-type BottomTab = 'timeline' | 'add' | 'layers';
+type BottomTab = 'timeline' | 'add' | 'layers' | 'props';
 type AddSubTab = 'media' | 'shape' | 'text';
 
 export default function EditorShell() {
   const [activeTab, setActiveTab] = useState<BottomTab>('add');
-  const [isPlaying, setIsPlaying] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const project = useEditorStore((s) => s.project);
+  const isPlaying = useEditorStore((s) => s.isPlaying);
+  const playhead = useEditorStore((s) => s.playhead);
+  const setPlaying = useEditorStore((s) => s.setPlaying);
+  const setPlayhead = useEditorStore((s) => s.setPlayhead);
+  const selectedLayerId = useEditorStore((s) => s.project.selectedLayerId);
   const addImageLayer = useEditorStore((s) => s.addImageLayer);
   const addShapeLayer = useEditorStore((s) => s.addShapeLayer);
   const addTextLayer = useEditorStore((s) => s.addTextLayer);
@@ -52,6 +58,28 @@ export default function EditorShell() {
     };
   }, []);
 
+  // Playback loop
+  useEffect(() => {
+    if (!isPlaying) return;
+    let raf = 0;
+    let last = performance.now();
+    const tick = (now: number) => {
+      const dt = (now - last) / 1000;
+      last = now;
+      const state = useEditorStore.getState();
+      const next = state.playhead + dt;
+      if (next >= state.project.settings.duration) {
+        state.setPlayhead(0);
+        state.setPlaying(false);
+        return;
+      }
+      state.setPlayhead(next);
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [isPlaying]);
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
@@ -62,9 +90,16 @@ export default function EditorShell() {
       }
     }
     e.target.value = '';
+    setActiveTab('props');
   };
 
   const handleImportClick = () => fileInputRef.current?.click();
+
+  const formatTime = (s: number) => {
+    const sec = Math.floor(s);
+    const cs = Math.floor((s - sec) * 100);
+    return `${String(sec).padStart(2, '0')}:${String(cs).padStart(2, '0')}`;
+  };
 
   return (
     <div className="flex h-[100dvh] w-screen flex-col overflow-hidden bg-ink-950 text-white">
@@ -97,6 +132,9 @@ export default function EditorShell() {
           <span className="text-xs font-semibold text-ink-200">
             {project.name}
           </span>
+          <span className="rounded bg-white/5 px-1.5 py-0.5 font-mono text-[10px] text-ink-400">
+            {formatTime(playhead)} / {project.settings.duration}s
+          </span>
         </div>
 
         <div className="flex items-center gap-0.5">
@@ -109,10 +147,9 @@ export default function EditorShell() {
         </div>
       </header>
 
-      {/* Canvas */}
       <Canvas />
 
-      {/* Playback */}
+      {/* Playback Controls */}
       <div className="flex h-12 shrink-0 items-center justify-between border-t border-white/5 bg-ink-900 px-2">
         <div className="flex items-center gap-0.5">
           <IconBtn icon={<Undo className="h-4 w-4" />} title="Undo" />
@@ -120,9 +157,13 @@ export default function EditorShell() {
         </div>
 
         <div className="flex items-center gap-1">
-          <IconBtn icon={<SkipBack className="h-4 w-4" />} title="Prev" />
+          <IconBtn
+            icon={<SkipBack className="h-4 w-4" />}
+            title="Ke Awal"
+            onClick={() => setPlayhead(0)}
+          />
           <button
-            onClick={() => setIsPlaying(!isPlaying)}
+            onClick={() => setPlaying(!isPlaying)}
             className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-ashiro text-white shadow-glow transition-transform active:scale-95"
           >
             {isPlaying ? (
@@ -131,7 +172,11 @@ export default function EditorShell() {
               <Play className="ml-0.5 h-4 w-4" fill="currentColor" />
             )}
           </button>
-          <IconBtn icon={<SkipForward className="h-4 w-4" />} title="Next" />
+          <IconBtn
+            icon={<SkipForward className="h-4 w-4" />}
+            title="Ke Akhir"
+            onClick={() => setPlayhead(project.settings.duration)}
+          />
         </div>
 
         <div className="flex items-center gap-0.5">
@@ -164,22 +209,36 @@ export default function EditorShell() {
           icon={<LayersIcon className="h-3.5 w-3.5" />}
           label="Layer"
         />
+        <TabBtn
+          active={activeTab === 'props'}
+          onClick={() => setActiveTab('props')}
+          icon={<Sliders className="h-3.5 w-3.5" />}
+          label="Properti"
+          dot={!!selectedLayerId}
+        />
       </div>
 
       {/* Bottom Panel */}
       <div
         className="shrink-0 border-t border-white/5 bg-ink-900"
-        style={{ height: '28vh', minHeight: 170, maxHeight: 320 }}
+        style={{ height: '30vh', minHeight: 180, maxHeight: 340 }}
       >
         {activeTab === 'timeline' && <TimelineTab />}
         {activeTab === 'add' && (
           <AddTab
             onImport={handleImportClick}
-            onShape={addShapeLayer}
-            onText={() => addTextLayer()}
+            onShape={(k) => {
+              addShapeLayer(k);
+              setActiveTab('props');
+            }}
+            onText={() => {
+              addTextLayer();
+              setActiveTab('props');
+            }}
           />
         )}
         {activeTab === 'layers' && <LayersTab />}
+        {activeTab === 'props' && <PropertiesPanel />}
       </div>
     </div>
   );
@@ -210,20 +269,27 @@ function TabBtn({
   onClick,
   icon,
   label,
+  dot = false,
 }: {
   active: boolean;
   onClick: () => void;
   icon: React.ReactNode;
   label: string;
+  dot?: boolean;
 }) {
   return (
     <button
       onClick={onClick}
-      className={`relative flex flex-1 items-center justify-center gap-2 text-xs font-medium transition-colors ${
+      className={`relative flex flex-1 items-center justify-center gap-1.5 text-[11px] font-medium transition-colors ${
         active ? 'text-white' : 'text-ink-500 hover:text-ink-200'
       }`}
     >
-      {icon}
+      <span className="relative">
+        {icon}
+        {dot && !active && (
+          <span className="absolute -right-1 -top-1 h-1.5 w-1.5 rounded-full bg-ashiro-500" />
+        )}
+      </span>
       {label}
       {active && (
         <span className="absolute bottom-0 left-1/2 h-0.5 w-10 -translate-x-1/2 rounded-t-full bg-ashiro-500" />
@@ -234,7 +300,24 @@ function TabBtn({
 
 function TimelineTab() {
   const project = useEditorStore((s) => s.project);
+  const playhead = useEditorStore((s) => s.playhead);
+  const setPlayhead = useEditorStore((s) => s.setPlayhead);
   const layers = project.layers;
+  const duration = project.settings.duration;
+
+  const handleRulerClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const ratio = Math.max(0, Math.min(1, x / rect.width));
+    setPlayhead(ratio * duration);
+  };
+
+  const handleRulerDrag = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.buttons !== 1) return;
+    handleRulerClick(e as unknown as React.MouseEvent<HTMLDivElement>);
+  };
+
+  const playheadPct = (playhead / duration) * 100;
 
   return (
     <div className="flex h-full flex-col">
@@ -243,11 +326,12 @@ function TimelineTab() {
           Timeline
         </span>
         <span className="font-mono text-[10px] text-ink-500">
-          {project.settings.fps} fps · {project.settings.duration}s
+          {project.settings.fps} fps · {duration}s
         </span>
       </div>
 
       <div className="flex min-h-0 flex-1">
+        {/* Layer names */}
         <div className="w-20 shrink-0 space-y-1 overflow-y-auto border-r border-white/5 p-1.5">
           {layers.map((l) => (
             <div
@@ -262,21 +346,42 @@ function TimelineTab() {
           )}
         </div>
 
-        <div className="relative flex-1 overflow-x-auto">
-          <div className="min-w-[600px] px-2">
-            <div className="flex h-5 items-center gap-10 border-b border-white/5 pb-1 font-mono text-[9px] text-ink-500">
-              {Array.from({ length: 11 }, (_, i) => (
-                <span key={i}>{i}s</span>
+        {/* Tracks */}
+        <div className="relative flex-1 overflow-hidden">
+          {/* Ruler — clickable & draggable */}
+          <div
+            className="relative h-6 cursor-pointer border-b border-white/5 select-none touch-none"
+            onPointerDown={(e) => {
+              (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+              handleRulerClick(e as unknown as React.MouseEvent<HTMLDivElement>);
+            }}
+            onPointerMove={handleRulerDrag}
+          >
+            <div className="flex h-full items-center justify-between px-2 font-mono text-[9px] text-ink-500">
+              {Array.from({ length: 6 }, (_, i) => (
+                <span key={i}>{Math.round((i * duration) / 5)}s</span>
               ))}
             </div>
+          </div>
 
-            <div className="playhead" style={{ left: '0%', top: '20px' }} />
+          {/* Playhead */}
+          <div
+            className="pointer-events-none absolute top-0 bottom-0 z-20 w-0.5 bg-neon-500"
+            style={{
+              left: `${playheadPct}%`,
+              boxShadow: '0 0 8px rgba(255,92,200,0.8)',
+            }}
+          >
+            <div className="absolute -left-1 -top-0 h-2 w-2.5 rounded-sm bg-neon-500" />
+          </div>
 
-            <div className="space-y-1 pt-2">
+          {/* Layer tracks */}
+          <div className="overflow-y-auto p-1.5" style={{ height: 'calc(100% - 24px)' }}>
+            <div className="space-y-1">
               {layers.map((l) => (
                 <div
                   key={l.id}
-                  className="relative h-6 rounded bg-white/[0.02]"
+                  className="relative h-6 rounded bg-white/[0.03]"
                 >
                   <div className="track-clip absolute left-0 top-0 h-full w-1/3" />
                 </div>
@@ -338,9 +443,7 @@ function AddTab({
             <div className="text-center">
               <ImagePlus className="mx-auto mb-2 h-6 w-6" />
               <p className="text-xs font-medium">Pilih dari galeri</p>
-              <p className="mt-1 text-[10px] text-ink-500">
-                JPG, PNG, WEBP
-              </p>
+              <p className="mt-1 text-[10px] text-ink-500">JPG, PNG, WEBP</p>
             </div>
           </button>
         )}
@@ -368,9 +471,7 @@ function AddTab({
             <div className="text-center">
               <Type className="mx-auto mb-2 h-6 w-6" />
               <p className="text-xs font-medium">Tambah teks</p>
-              <p className="mt-1 text-[10px] text-ink-500">
-                Ketik apa saja
-              </p>
+              <p className="mt-1 text-[10px] text-ink-500">Ketik apa saja</p>
             </div>
           </button>
         )}
@@ -394,9 +495,7 @@ function SubTab({
     <button
       onClick={onClick}
       className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg py-1.5 text-xs font-medium transition-colors ${
-        active
-          ? 'bg-white/5 text-white'
-          : 'text-ink-500 hover:text-ink-200'
+        active ? 'bg-white/5 text-white' : 'text-ink-500 hover:text-ink-200'
       }`}
     >
       {icon}
@@ -435,9 +534,7 @@ function LayersTab() {
 
       <div className="min-h-0 flex-1 overflow-y-auto">
         {reversed.length === 0 && (
-          <p className="p-4 text-center text-xs text-ink-500">
-            Belum ada layer
-          </p>
+          <p className="p-4 text-center text-xs text-ink-500">Belum ada layer</p>
         )}
 
         {reversed.map((layer) => (
