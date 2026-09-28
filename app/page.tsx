@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   Sparkles,
   Layers,
@@ -10,9 +11,11 @@ import {
   Check,
   Monitor,
   Wand2,
-  Film,
   Palette,
 } from 'lucide-react';
+
+const LOGO_URL = '/logo.jpg';
+const TITLE_URL = '/title.jpg';
 
 // ============================================
 // Data
@@ -66,21 +69,9 @@ const GALLERY = [
 ];
 
 const STEPS = [
-  {
-    number: '01',
-    title: 'Import',
-    description: 'Tarik video, gambar, atau audio ke timeline. Format populer didukung.',
-  },
-  {
-    number: '02',
-    title: 'Edit',
-    description: 'Tambah efek, atur keyframe, sinkronkan dengan musik.',
-  },
-  {
-    number: '03',
-    title: 'Export',
-    description: 'Render dan download dalam MP4, GIF, atau format lain.',
-  },
+  { number: '01', title: 'Import', description: 'Tarik video, gambar, atau audio ke timeline.' },
+  { number: '02', title: 'Edit', description: 'Tambah efek, atur keyframe, sinkronkan dengan musik.' },
+  { number: '03', title: 'Export', description: 'Render dan download dalam MP4, GIF, atau format lain.' },
 ];
 
 const PRICING = [
@@ -115,54 +106,35 @@ const PRICING = [
   },
 ];
 
-// ============================================
-// Page
-// ============================================
 export default function HomePage() {
   return (
     <main className="relative overflow-hidden">
-      {/* ============================================
-          Navbar
-          ============================================ */}
+      {/* Navbar */}
       <header className="glass-strong fixed top-0 left-0 right-0 z-50">
         <nav className="container-page flex h-16 items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-ashiro">
-              <Film className="h-4 w-4 text-white" />
-            </div>
+            <Image
+              src={LOGO_URL}
+              alt="Ashiro"
+              width={32}
+              height={32}
+              className="rounded-md object-cover"
+              priority
+            />
             <span className="font-display text-sm font-bold tracking-widest">
               ASHIRO
             </span>
           </Link>
 
           <ul className="hidden items-center gap-8 md:flex">
-            <li>
-              <a href="#features" className="text-sm text-ink-300 hover:text-white">
-                Fitur
-              </a>
-            </li>
-            <li>
-              <a href="#gallery" className="text-sm text-ink-300 hover:text-white">
-                Galeri
-              </a>
-            </li>
-            <li>
-              <a href="#pricing" className="text-sm text-ink-300 hover:text-white">
-                Harga
-              </a>
-            </li>
-            <li>
-              <a href="#how" className="text-sm text-ink-300 hover:text-white">
-                Cara Pakai
-              </a>
-            </li>
+            <li><a href="#features" className="text-sm text-ink-300 hover:text-white">Fitur</a></li>
+            <li><a href="#gallery" className="text-sm text-ink-300 hover:text-white">Galeri</a></li>
+            <li><a href="#pricing" className="text-sm text-ink-300 hover:text-white">Harga</a></li>
+            <li><a href="#how" className="text-sm text-ink-300 hover:text-white">Cara Pakai</a></li>
           </ul>
 
           <div className="flex items-center gap-3">
-            <Link
-              href="/login"
-              className="hidden text-sm text-ink-300 hover:text-white md:block"
-            >
+            <Link href="/login" className="hidden text-sm text-ink-300 hover:text-white md:block">
               Masuk
             </Link>
             <Link href="/editor" className="btn btn-primary">
@@ -173,12 +145,9 @@ export default function HomePage() {
         </nav>
       </header>
 
-      {/* ============================================
-          Hero
-          ============================================ */}
+      {/* Hero */}
       <section className="relative pt-32 pb-20 md:pt-40 md:pb-32">
         <div className="bg-canvas-grid absolute inset-0 opacity-40" />
-
         <div className="absolute left-1/4 top-0 h-96 w-96 -translate-x-1/2 rounded-full bg-ashiro-500/20 blur-[120px]" />
         <div className="absolute right-1/4 top-40 h-96 w-96 translate-x-1/2 rounded-full bg-neon-500/20 blur-[120px]" />
 
@@ -189,11 +158,17 @@ export default function HomePage() {
               <span>Baru — Export MP4 di browser</span>
             </div>
 
-            <h1 className="font-display text-5xl font-bold leading-[1.05] tracking-tight md:text-7xl">
-              Bikin Motion Graphics
-              <br />
-              <span className="text-gradient">di Mana Saja</span>
-            </h1>
+            {/* Judul — pakai gambar */}
+            <div className="mx-auto mb-6 w-full max-w-3xl">
+              <Image
+                src={TITLE_URL}
+                alt="Ashiro Motion Picture"
+                width={1200}
+                height={400}
+                className="h-auto w-full rounded-2xl object-contain"
+                priority
+              />
+            </div>
 
             <p className="mt-6 text-lg text-ink-300 md:text-xl">
               Ashiro Motion Picture adalah editor motion graphics dan video
@@ -217,10 +192,9 @@ export default function HomePage() {
             </p>
           </div>
 
-          {/* Editor preview mockup */}
+          {/* Mockup editor */}
           <div className="relative mt-20 md:mt-24">
             <div className="glass-strong mx-auto max-w-5xl overflow-hidden rounded-2xl border border-white/10 shadow-2xl">
-              {/* Fake toolbar */}
               <div className="flex items-center gap-2 border-b border-white/5 bg-black/40 px-4 py-3">
                 <div className="h-3 w-3 rounded-full bg-red-500/60" />
                 <div className="h-3 w-3 rounded-full bg-yellow-500/60" />
@@ -230,9 +204,7 @@ export default function HomePage() {
                 </div>
               </div>
 
-              {/* Fake editor */}
               <div className="grid grid-cols-12 gap-0 bg-ink-950">
-                {/* Left toolbar */}
                 <div className="col-span-1 border-r border-white/5 p-3">
                   <div className="space-y-3">
                     <div className="h-6 w-6 rounded bg-ashiro-500/30" />
@@ -242,7 +214,6 @@ export default function HomePage() {
                   </div>
                 </div>
 
-                {/* Canvas */}
                 <div className="col-span-8 aspect-video bg-canvas-grid relative">
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="rounded-2xl bg-gradient-ashiro p-1 shadow-glow">
@@ -259,7 +230,6 @@ export default function HomePage() {
                   <div className="absolute left-1/2 top-0 h-full w-px bg-neon-500 shadow-glow-neon" />
                 </div>
 
-                {/* Right panel */}
                 <div className="col-span-3 border-l border-white/5 p-3">
                   <div className="mb-3 text-xs font-semibold uppercase tracking-wider text-ink-400">
                     Properties
@@ -284,7 +254,6 @@ export default function HomePage() {
                   </div>
                 </div>
 
-                {/* Timeline */}
                 <div className="col-span-12 border-t border-white/5 p-3">
                   <div className="space-y-1.5">
                     {[70, 45, 85, 30].map((w, i) => (
@@ -310,9 +279,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ============================================
-          Features
-          ============================================ */}
+      {/* Features */}
       <section id="features" className="relative py-24 md:py-32">
         <div className="container-page">
           <div className="mx-auto max-w-2xl text-center">
@@ -321,8 +288,7 @@ export default function HomePage() {
               Semua yang kamu butuh
             </h2>
             <p className="mt-4 text-ink-300">
-              Tanpa ribet, tanpa install. Semua fitur editing profesional di
-              browser.
+              Tanpa ribet, tanpa install. Semua fitur editing profesional di browser.
             </p>
           </div>
 
@@ -334,9 +300,7 @@ export default function HomePage() {
                   <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-ashiro-500/10 text-ashiro-400 transition-colors group-hover:bg-ashiro-500/20">
                     <Icon className="h-5 w-5" />
                   </div>
-                  <h3 className="font-display text-lg font-semibold">
-                    {feature.title}
-                  </h3>
+                  <h3 className="font-display text-lg font-semibold">{feature.title}</h3>
                   <p className="mt-2 text-sm leading-relaxed text-ink-400">
                     {feature.description}
                   </p>
@@ -347,9 +311,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ============================================
-          Gallery
-          ============================================ */}
+      {/* Gallery */}
       <section id="gallery" className="relative py-24 md:py-32">
         <div className="container-page">
           <div className="mx-auto max-w-2xl text-center">
@@ -372,7 +334,6 @@ export default function HomePage() {
                   className={`absolute inset-0 bg-gradient-to-br ${item.gradient} opacity-80 transition-transform duration-500 group-hover:scale-110`}
                 />
                 <div className="absolute inset-0 bg-black/40" />
-
                 <div className="absolute inset-0 flex flex-col justify-end p-5">
                   <div className="text-xs font-medium uppercase tracking-wider text-white/70">
                     {item.tag}
@@ -381,7 +342,6 @@ export default function HomePage() {
                     {item.title}
                   </div>
                 </div>
-
                 <div className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 opacity-0 backdrop-blur transition-opacity group-hover:opacity-100">
                   <Play className="h-4 w-4 text-white" />
                 </div>
@@ -391,9 +351,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ============================================
-          How It Works
-          ============================================ */}
+      {/* How */}
       <section id="how" className="relative py-24 md:py-32">
         <div className="container-page">
           <div className="mx-auto max-w-2xl text-center">
@@ -401,9 +359,7 @@ export default function HomePage() {
             <h2 className="font-display text-4xl font-bold md:text-5xl">
               Tiga langkah saja
             </h2>
-            <p className="mt-4 text-ink-300">
-              Dari ide sampai export, semuanya di browser.
-            </p>
+            <p className="mt-4 text-ink-300">Dari ide sampai export, semuanya di browser.</p>
           </div>
 
           <div className="mt-16 grid gap-8 md:grid-cols-3">
@@ -412,11 +368,8 @@ export default function HomePage() {
                 <div className="font-mono text-6xl font-bold text-ashiro-500/20 md:text-7xl">
                   {step.number}
                 </div>
-                <h3 className="mt-2 font-display text-2xl font-bold">
-                  {step.title}
-                </h3>
+                <h3 className="mt-2 font-display text-2xl font-bold">{step.title}</h3>
                 <p className="mt-3 text-ink-400">{step.description}</p>
-
                 {i < STEPS.length - 1 && (
                   <ArrowRight className="absolute -right-4 top-8 hidden h-6 w-6 text-ink-600 md:block" />
                 )}
@@ -426,9 +379,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ============================================
-          Pricing
-          ============================================ */}
+      {/* Pricing */}
       <section id="pricing" className="relative py-24 md:py-32">
         <div className="container-page">
           <div className="mx-auto max-w-2xl text-center">
@@ -436,9 +387,7 @@ export default function HomePage() {
             <h2 className="font-display text-4xl font-bold md:text-5xl">
               Gratis untuk mulai
             </h2>
-            <p className="mt-4 text-ink-300">
-              Upgrade kapan saja kalau butuh lebih.
-            </p>
+            <p className="mt-4 text-ink-300">Upgrade kapan saja kalau butuh lebih.</p>
           </div>
 
           <div className="mx-auto mt-16 grid max-w-4xl gap-6 md:grid-cols-2">
@@ -459,9 +408,7 @@ export default function HomePage() {
 
                 <h3 className="font-display text-xl font-bold">{plan.name}</h3>
                 <div className="mt-4 flex items-baseline gap-2">
-                  <span className="font-display text-4xl font-bold">
-                    {plan.price}
-                  </span>
+                  <span className="font-display text-4xl font-bold">{plan.price}</span>
                   <span className="text-sm text-ink-400">/ {plan.period}</span>
                 </div>
 
@@ -488,9 +435,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ============================================
-          CTA
-          ============================================ */}
+      {/* CTA */}
       <section className="relative py-24 md:py-32">
         <div className="container-page">
           <div className="relative overflow-hidden rounded-3xl border border-ashiro-500/30 bg-gradient-to-br from-ashiro-950 via-ink-950 to-neon-950 p-12 text-center md:p-20">
@@ -505,48 +450,38 @@ export default function HomePage() {
               </p>
 
               <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-                <Link
-                  href="/editor"
-                  className="btn btn-primary !px-8 !py-3.5 !text-base"
-                >
+                <Link href="/editor" className="btn btn-primary !px-8 !py-3.5 !text-base">
                   <Play className="h-4 w-4" />
                   Buka Editor
                 </Link>
-                <Link
-                  href="/register"
-                  className="btn btn-secondary !px-8 !py-3.5 !text-base"
-                >
+                <Link href="/register" className="btn btn-secondary !px-8 !py-3.5 !text-base">
                   Daftar Gratis
                 </Link>
               </div>
 
               <div className="mt-8 flex flex-wrap items-center justify-center gap-6 text-xs text-ink-400">
-                <span className="flex items-center gap-2">
-                  <Check className="h-3 w-3" /> Tanpa kartu kredit
-                </span>
-                <span className="flex items-center gap-2">
-                  <Check className="h-3 w-3" /> Tanpa watermark
-                </span>
-                <span className="flex items-center gap-2">
-                  <Check className="h-3 w-3" /> Export tanpa batas
-                </span>
+                <span className="flex items-center gap-2"><Check className="h-3 w-3" /> Tanpa kartu kredit</span>
+                <span className="flex items-center gap-2"><Check className="h-3 w-3" /> Tanpa watermark</span>
+                <span className="flex items-center gap-2"><Check className="h-3 w-3" /> Export tanpa batas</span>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ============================================
-          Footer
-          ============================================ */}
+      {/* Footer */}
       <footer className="border-t border-white/5 py-12">
         <div className="container-page">
           <div className="grid gap-8 md:grid-cols-4">
             <div>
               <Link href="/" className="flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-ashiro">
-                  <Film className="h-4 w-4 text-white" />
-                </div>
+                <Image
+                  src={LOGO_URL}
+                  alt="Ashiro"
+                  width={32}
+                  height={32}
+                  className="rounded-md object-cover"
+                />
                 <span className="font-display text-sm font-bold tracking-widest">
                   ASHIRO
                 </span>
@@ -559,75 +494,33 @@ export default function HomePage() {
             <div>
               <h4 className="font-display text-sm font-bold">Produk</h4>
               <ul className="mt-4 space-y-2 text-sm text-ink-400">
-                <li>
-                  <Link href="/editor" className="hover:text-white">
-                    Editor
-                  </Link>
-                </li>
-                <li>
-                  <a href="#features" className="hover:text-white">
-                    Fitur
-                  </a>
-                </li>
-                <li>
-                  <a href="#pricing" className="hover:text-white">
-                    Harga
-                  </a>
-                </li>
+                <li><Link href="/editor" className="hover:text-white">Editor</Link></li>
+                <li><a href="#features" className="hover:text-white">Fitur</a></li>
+                <li><a href="#pricing" className="hover:text-white">Harga</a></li>
               </ul>
             </div>
 
             <div>
               <h4 className="font-display text-sm font-bold">Sumber</h4>
               <ul className="mt-4 space-y-2 text-sm text-ink-400">
-                <li>
-                  <Link href="/docs" className="hover:text-white">
-                    Dokumentasi
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/blog" className="hover:text-white">
-                    Blog
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/changelog" className="hover:text-white">
-                    Changelog
-                  </Link>
-                </li>
+                <li><Link href="/docs" className="hover:text-white">Dokumentasi</Link></li>
+                <li><Link href="/blog" className="hover:text-white">Blog</Link></li>
+                <li><Link href="/changelog" className="hover:text-white">Changelog</Link></li>
               </ul>
             </div>
 
             <div>
               <h4 className="font-display text-sm font-bold">Perusahaan</h4>
               <ul className="mt-4 space-y-2 text-sm text-ink-400">
+                <li><Link href="/about" className="hover:text-white">Tentang</Link></li>
+                <li><Link href="/contact" className="hover:text-white">Kontak</Link></li>
                 <li>
-                  <Link href="/about" className="hover:text-white">
-                    Tentang
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/contact" className="hover:text-white">
-                    Kontak
-                  </Link>
-                </li>
-                <li>
-                  <a
-                    href="https://t.me/AzureLyount"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hover:text-white"
-                  >
+                  <a href="https://t.me/AzureLyount" target="_blank" rel="noopener noreferrer" className="hover:text-white">
                     Telegram
                   </a>
                 </li>
                 <li>
-                  <a
-                    href="https://whatsapp.com/channel/0029VbDz1xsEQIau8FQEtF16"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hover:text-white"
-                  >
+                  <a href="https://whatsapp.com/channel/0029VbDz1xsEQIau8FQEtF16" target="_blank" rel="noopener noreferrer" className="hover:text-white">
                     WhatsApp
                   </a>
                 </li>
@@ -638,10 +531,7 @@ export default function HomePage() {
           <div className="divider mt-12" />
 
           <div className="flex flex-col items-center justify-between gap-4 text-xs text-ink-500 md:flex-row">
-            <p>
-              © {new Date().getFullYear()} Ashiro Motion Picture. All rights
-              reserved.
-            </p>
+            <p>© {new Date().getFullYear()} Ashiro Motion Picture. All rights reserved.</p>
             <div className="flex items-center gap-2">
               <Monitor className="h-3 w-3" />
               <span>Dibuat dengan Next.js + Vercel</span>
@@ -651,4 +541,4 @@ export default function HomePage() {
       </footer>
     </main>
   );
-}
+                    }
