@@ -35,9 +35,6 @@ import Canvas from './Canvas';
 type BottomTab = 'timeline' | 'add' | 'layers';
 type AddSubTab = 'media' | 'shape' | 'text';
 
-// ============================================
-// EditorShell — mobile-first layout
-// ============================================
 export default function EditorShell() {
   const [activeTab, setActiveTab] = useState<BottomTab>('add');
   const [isPlaying, setIsPlaying] = useState(false);
@@ -80,13 +77,11 @@ export default function EditorShell() {
         className="hidden"
       />
 
-      {/* ============================================
-          Top Bar
-          ============================================ */}
-      <header className="flex h-12 shrink-0 items-center justify-between border-b border-white/5 bg-ink-900 px-3">
+      {/* Top Bar */}
+      <header className="flex h-12 shrink-0 items-center justify-between border-b border-white/5 bg-ink-900 px-2">
         <Link
           href="/"
-          className="flex h-8 w-8 items-center justify-center rounded-md text-ink-300 hover:bg-white/5 hover:text-white"
+          className="flex h-9 w-9 items-center justify-center rounded-lg text-ink-300 transition-colors hover:bg-white/5 hover:text-white"
         >
           <ArrowLeft className="h-4 w-4" />
         </Link>
@@ -95,60 +90,62 @@ export default function EditorShell() {
           <Image
             src="/logo.jpg"
             alt="Ashiro"
-            width={20}
-            height={20}
+            width={22}
+            height={22}
             className="rounded object-cover"
           />
-          <span className="text-xs font-semibold">{project.name}</span>
+          <span className="text-xs font-semibold text-ink-200">
+            {project.name}
+          </span>
         </div>
 
-        <div className="flex items-center gap-1">
-          <button className="flex h-8 w-8 items-center justify-center rounded-md text-ink-300 hover:bg-white/5 hover:text-white">
+        <div className="flex items-center gap-0.5">
+          <button className="flex h-9 w-9 items-center justify-center rounded-lg text-ink-400 transition-colors hover:bg-white/5 hover:text-white">
             <Settings className="h-4 w-4" />
           </button>
-          <button className="flex h-8 w-8 items-center justify-center rounded-md text-ink-300 hover:bg-white/5 hover:text-white">
+          <button className="flex h-9 w-9 items-center justify-center rounded-lg text-ink-400 transition-colors hover:bg-white/5 hover:text-white">
             <Upload className="h-4 w-4" />
           </button>
         </div>
       </header>
 
-      {/* ============================================
-          Canvas
-          ============================================ */}
+      {/* Canvas */}
       <Canvas />
 
-      {/* ============================================
-          Playback Controls
-          ============================================ */}
-      <div className="flex h-12 shrink-0 items-center justify-around border-t border-white/5 bg-ink-900 px-2">
-        <IconBtn icon={<Undo className="h-4 w-4" />} title="Undo" />
-        <IconBtn icon={<Redo className="h-4 w-4" />} title="Redo" />
-        <IconBtn icon={<SkipBack className="h-4 w-4" />} title="Prev" />
+      {/* Playback */}
+      <div className="flex h-12 shrink-0 items-center justify-between border-t border-white/5 bg-ink-900 px-2">
+        <div className="flex items-center gap-0.5">
+          <IconBtn icon={<Undo className="h-4 w-4" />} title="Undo" />
+          <IconBtn icon={<Redo className="h-4 w-4" />} title="Redo" />
+        </div>
 
-        <button
-          onClick={() => setIsPlaying(!isPlaying)}
-          className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20"
-        >
-          {isPlaying ? (
-            <Pause className="h-4 w-4" />
-          ) : (
-            <Play className="ml-0.5 h-4 w-4" />
-          )}
-        </button>
+        <div className="flex items-center gap-1">
+          <IconBtn icon={<SkipBack className="h-4 w-4" />} title="Prev" />
+          <button
+            onClick={() => setIsPlaying(!isPlaying)}
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-ashiro text-white shadow-glow transition-transform active:scale-95"
+          >
+            {isPlaying ? (
+              <Pause className="h-4 w-4" />
+            ) : (
+              <Play className="ml-0.5 h-4 w-4" fill="currentColor" />
+            )}
+          </button>
+          <IconBtn icon={<SkipForward className="h-4 w-4" />} title="Next" />
+        </div>
 
-        <IconBtn icon={<SkipForward className="h-4 w-4" />} title="Next" />
-        <IconBtn
-          icon={<Plus className="h-4 w-4" />}
-          title="Tambah"
-          onClick={() => setActiveTab('add')}
-        />
-        <IconBtn icon={<Maximize className="h-4 w-4" />} title="Fit" />
+        <div className="flex items-center gap-0.5">
+          <IconBtn
+            icon={<Plus className="h-4 w-4" />}
+            title="Tambah"
+            onClick={() => setActiveTab('add')}
+          />
+          <IconBtn icon={<Maximize className="h-4 w-4" />} title="Fit" />
+        </div>
       </div>
 
-      {/* ============================================
-          Tab Bar
-          ============================================ */}
-      <div className="flex h-10 shrink-0 border-t border-white/5 bg-ink-900">
+      {/* Tab Bar */}
+      <div className="flex h-11 shrink-0 border-t border-white/5 bg-ink-900">
         <TabBtn
           active={activeTab === 'timeline'}
           onClick={() => setActiveTab('timeline')}
@@ -169,12 +166,10 @@ export default function EditorShell() {
         />
       </div>
 
-      {/* ============================================
-          Bottom Panel
-          ============================================ */}
+      {/* Bottom Panel */}
       <div
         className="shrink-0 border-t border-white/5 bg-ink-900"
-        style={{ height: '28vh', minHeight: 160, maxHeight: 320 }}
+        style={{ height: '28vh', minHeight: 170, maxHeight: 320 }}
       >
         {activeTab === 'timeline' && <TimelineTab />}
         {activeTab === 'add' && (
@@ -190,9 +185,6 @@ export default function EditorShell() {
   );
 }
 
-// ============================================
-// IconBtn
-// ============================================
 function IconBtn({
   icon,
   title,
@@ -206,16 +198,13 @@ function IconBtn({
     <button
       onClick={onClick}
       title={title}
-      className="flex h-8 w-8 items-center justify-center rounded-md text-ink-400 transition-colors hover:bg-white/5 hover:text-white"
+      className="flex h-9 w-9 items-center justify-center rounded-lg text-ink-400 transition-colors hover:bg-white/5 hover:text-white"
     >
       {icon}
     </button>
   );
 }
 
-// ============================================
-// TabBtn
-// ============================================
 function TabBtn({
   active,
   onClick,
@@ -230,21 +219,19 @@ function TabBtn({
   return (
     <button
       onClick={onClick}
-      className={`flex flex-1 items-center justify-center gap-1.5 text-xs font-medium transition-colors ${
-        active
-          ? 'border-b-2 border-ashiro-500 text-white'
-          : 'border-b-2 border-transparent text-ink-400 hover:text-white'
+      className={`relative flex flex-1 items-center justify-center gap-2 text-xs font-medium transition-colors ${
+        active ? 'text-white' : 'text-ink-500 hover:text-ink-200'
       }`}
     >
       {icon}
       {label}
+      {active && (
+        <span className="absolute bottom-0 left-1/2 h-0.5 w-10 -translate-x-1/2 rounded-t-full bg-ashiro-500" />
+      )}
     </button>
   );
 }
 
-// ============================================
-// TimelineTab
-// ============================================
 function TimelineTab() {
   const project = useEditorStore((s) => s.project);
   const layers = project.layers;
@@ -252,7 +239,7 @@ function TimelineTab() {
   return (
     <div className="flex h-full flex-col">
       <div className="flex h-8 shrink-0 items-center justify-between border-b border-white/5 px-3">
-        <span className="text-[10px] uppercase tracking-wider text-ink-500">
+        <span className="text-[10px] font-medium uppercase tracking-wider text-ink-500">
           Timeline
         </span>
         <span className="font-mono text-[10px] text-ink-500">
@@ -261,7 +248,6 @@ function TimelineTab() {
       </div>
 
       <div className="flex min-h-0 flex-1">
-        {/* Kolom nama layer */}
         <div className="w-20 shrink-0 space-y-1 overflow-y-auto border-r border-white/5 p-1.5">
           {layers.map((l) => (
             <div
@@ -276,7 +262,6 @@ function TimelineTab() {
           )}
         </div>
 
-        {/* Track */}
         <div className="relative flex-1 overflow-x-auto">
           <div className="min-w-[600px] px-2">
             <div className="flex h-5 items-center gap-10 border-b border-white/5 pb-1 font-mono text-[9px] text-ink-500">
@@ -285,10 +270,7 @@ function TimelineTab() {
               ))}
             </div>
 
-            <div
-              className="playhead"
-              style={{ left: '0%', top: '20px' }}
-            />
+            <div className="playhead" style={{ left: '0%', top: '20px' }} />
 
             <div className="space-y-1 pt-2">
               {layers.map((l) => (
@@ -303,7 +285,7 @@ function TimelineTab() {
 
             {layers.length === 0 && (
               <p className="mt-4 text-center text-[10px] text-ink-600">
-                Timeline kosong — tambah layer untuk mulai
+                Timeline kosong
               </p>
             )}
           </div>
@@ -313,9 +295,6 @@ function TimelineTab() {
   );
 }
 
-// ============================================
-// AddTab
-// ============================================
 function AddTab({
   onImport,
   onShape,
@@ -329,49 +308,50 @@ function AddTab({
 
   return (
     <div className="flex h-full flex-col">
-      {/* Sub-tabs */}
-      <div className="flex h-10 shrink-0 items-center border-b border-white/5">
+      <div className="flex h-10 shrink-0 items-center border-b border-white/5 px-2">
         <SubTab
           active={subTab === 'media'}
           onClick={() => setSubTab('media')}
-          icon={<ImagePlus className="h-4 w-4" />}
+          icon={<ImagePlus className="h-3.5 w-3.5" />}
           label="Media"
         />
         <SubTab
           active={subTab === 'shape'}
           onClick={() => setSubTab('shape')}
-          icon={<Square className="h-4 w-4" />}
+          icon={<Square className="h-3.5 w-3.5" />}
           label="Bentuk"
         />
         <SubTab
           active={subTab === 'text'}
           onClick={() => setSubTab('text')}
-          icon={<Type className="h-4 w-4" />}
+          icon={<Type className="h-3.5 w-3.5" />}
           label="Teks"
         />
       </div>
 
-      {/* Content */}
       <div className="flex-1 overflow-y-auto p-3">
         {subTab === 'media' && (
           <button
             onClick={onImport}
-            className="flex h-full w-full items-center justify-center rounded-lg border-2 border-dashed border-white/10 text-xs text-ink-400 transition-colors hover:border-ashiro-500 hover:text-white"
+            className="flex h-full w-full items-center justify-center rounded-xl border border-dashed border-white/10 text-ink-400 transition-colors hover:border-ashiro-500/50 hover:bg-ashiro-500/5 hover:text-white"
           >
             <div className="text-center">
               <ImagePlus className="mx-auto mb-2 h-6 w-6" />
-              Pilih foto dari galeri
+              <p className="text-xs font-medium">Pilih dari galeri</p>
+              <p className="mt-1 text-[10px] text-ink-500">
+                JPG, PNG, WEBP
+              </p>
             </div>
           </button>
         )}
 
         {subTab === 'shape' && (
-          <div className="grid grid-cols-4 gap-2 sm:grid-cols-6">
+          <div className="grid grid-cols-5 gap-2">
             {SHAPES.map(({ kind, label, icon }) => (
               <button
                 key={kind}
                 onClick={() => onShape(kind)}
-                className="flex aspect-square items-center justify-center rounded-lg bg-white/5 text-ink-300 transition-colors hover:bg-ashiro-500/20 hover:text-white"
+                className="flex aspect-square flex-col items-center justify-center gap-1 rounded-xl bg-white/[0.04] text-ink-300 transition-all hover:bg-ashiro-500/15 hover:text-white active:scale-95"
                 title={label}
               >
                 {icon}
@@ -383,11 +363,14 @@ function AddTab({
         {subTab === 'text' && (
           <button
             onClick={onText}
-            className="flex h-full w-full items-center justify-center rounded-lg border-2 border-dashed border-white/10 text-xs text-ink-400 transition-colors hover:border-ashiro-500 hover:text-white"
+            className="flex h-full w-full items-center justify-center rounded-xl border border-dashed border-white/10 text-ink-400 transition-colors hover:border-ashiro-500/50 hover:bg-ashiro-500/5 hover:text-white"
           >
             <div className="text-center">
               <Type className="mx-auto mb-2 h-6 w-6" />
-              Tambah teks
+              <p className="text-xs font-medium">Tambah teks</p>
+              <p className="mt-1 text-[10px] text-ink-500">
+                Ketik apa saja
+              </p>
             </div>
           </button>
         )}
@@ -410,10 +393,10 @@ function SubTab({
   return (
     <button
       onClick={onClick}
-      className={`flex flex-1 items-center justify-center gap-1.5 text-xs transition-colors ${
+      className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg py-1.5 text-xs font-medium transition-colors ${
         active
-          ? 'border-b-2 border-ashiro-500 text-white'
-          : 'border-b-2 border-transparent text-ink-400 hover:text-white'
+          ? 'bg-white/5 text-white'
+          : 'text-ink-500 hover:text-ink-200'
       }`}
     >
       {icon}
@@ -422,7 +405,6 @@ function SubTab({
   );
 }
 
-// Daftar shape yang tersedia
 const SHAPES: { kind: ShapeKind; label: string; icon: React.ReactNode }[] = [
   { kind: 'rectangle', label: 'Rectangle', icon: <Square className="h-5 w-5" /> },
   { kind: 'circle', label: 'Circle', icon: <Circle className="h-5 w-5" /> },
@@ -431,9 +413,6 @@ const SHAPES: { kind: ShapeKind; label: string; icon: React.ReactNode }[] = [
   { kind: 'line', label: 'Line', icon: <Minus className="h-5 w-5" /> },
 ];
 
-// ============================================
-// LayersTab
-// ============================================
 function LayersTab() {
   const layers = useEditorStore((s) => s.project.layers);
   const selectedId = useEditorStore((s) => s.project.selectedLayerId);
@@ -446,7 +425,7 @@ function LayersTab() {
   return (
     <div className="flex h-full flex-col">
       <div className="flex h-8 shrink-0 items-center justify-between border-b border-white/5 px-3">
-        <span className="text-[10px] uppercase tracking-wider text-ink-500">
+        <span className="text-[10px] font-medium uppercase tracking-wider text-ink-500">
           Layers
         </span>
         <span className="font-mono text-[10px] text-ink-500">
@@ -466,7 +445,7 @@ function LayersTab() {
             key={layer.id}
             onClick={() => selectLayer(layer.id)}
             className={`flex items-center gap-2 border-b border-white/5 px-3 py-2.5 transition-colors ${
-              layer.id === selectedId ? 'bg-ashiro-500/15' : ''
+              layer.id === selectedId ? 'bg-ashiro-500/10' : ''
             }`}
           >
             <button
@@ -501,4 +480,4 @@ function LayersTab() {
       </div>
     </div>
   );
-              }
+}
