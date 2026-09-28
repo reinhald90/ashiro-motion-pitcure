@@ -69,6 +69,7 @@ export interface BaseLayer {
   order: number;
   /** Efek yang terpasang (dari sistem efek) */
   effects: LayerEffect[];
+  keyframes?: LayerKeyframes;
 }
 
 // ============================================
