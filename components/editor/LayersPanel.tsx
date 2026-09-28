@@ -1,136 +1,250 @@
 'use client';
 
-import {
-  Trash2,
-  Eye,
-  EyeOff,
-  Lock,
-  Unlock,
-  Image as ImageIcon,
-  Square,
-  Type,
-} from 'lucide-react';
+import { useRef } from 'react';
 import { useEditorStore } from '@/stores/editorStore';
-import type { Layer } from '@/types/layer';
+import type { Layer, ImageLayer, ShapeLayer, TextLayer } from '@/types/layer';
+import { isImageLayer, isShapeLayer, isTextLayer } from '@/types/layer';
 
-export default function LayersPanel() {
-  const layers = useEditorStore((s) => s.project.layers);
-  const selectedId = useEditorStore((s) => s.project.selectedLayerId);
-  const selectLayer = useEditorStore((s) => s.selectLayer);
-  const removeLayer = useEditorStore((s) => s.removeLayer);
-  const toggleVisibility = useEditorStore((s) => s.toggleVisibility);
-  const toggleLock = useEditorStore((s) => s.toggleLock);
+type DragMode = 'move' | 'resize-br' | 'resize-tl';
 
-  const reversed = [...layers].reverse();
-
-  return (
-    <aside
-      className="flex shrink-0 flex-col border-l border-white/5 bg-ink-900"
-      style={{ width: '260px' }}
-    >
-      <div className="editor-panel-header">
-        <span>Layers</span>
-        <span className="font-mono text-[10px] text-ink-500">
-          {layers.length}
-        </span>
-      </div>
-
-      <div className="flex-1 overflow-y-auto">
-        {reversed.length === 0 && (
-          <p className="p-4 text-center text-xs text-ink-500">Belum ada layer</p>
-        )}
-
-        {reversed.map((layer) => (
-          <LayerRow
-            key={layer.id}
-            layer={layer}
-            selected={layer.id === selectedId}
-            onSelect={() => selectLayer(layer.id)}
-            onDelete={() => removeLayer(layer.id)}
-            onToggleVisibility={() => toggleVisibility(layer.id)}
-            onToggleLock={() => toggleLock(layer.id)}
-          />
-        ))}
-      </div>
-    </aside>
-  );
-}
-
-function LayerRow({
-  layer,
-  selected,
-  onSelect,
-  onDelete,
-  onToggleVisibility,
-  onToggleLock,
-}: {
+interface Props {
   layer: Layer;
   selected: boolean;
-  onSelect: () => void;
-  onDelete: () => void;
-  onToggleVisibility: () => void;
-  onToggleLock: () => void;
-}) {
-  const Icon =
-    layer.type === 'image'
-      ? ImageIcon
-      : layer.type === 'shape'
-      ? Square
-      : Type;
+  getScale: () => { sx: number; sy: number };
+}
+
+export default function LayerView({ layer, selected, getScale }: Props) {
+  const selectLayer = useEditorStore((s) => s.selectLayer);
+  const updateTransform = useEditorStore((s) => s.updateTransform);
+
+  const dragRef = useRef<{
+    mode: DragMode;
+    startX: number;
+    startY: number;
+    startTx: number;
+    startTy: number;
+    startW: number;
+    startH: number;
+  } | null>(null);
+
+  const t = layer.transform;
+
+  const style: React.CSSProperties = {
+    position: 'absolute',
+    left: t.x,
+    top: t.y,
+    width: t.width,
+    height: t.height,
+    opacity: t.opacity,
+    transform: `rotate(${t.rotation}deg) scale(${t.scaleX}, ${t.scaleY})`,
+    transformOrigin: 'center center',
+    display: layer.visible ? 'block' : 'none',
+    cursor: layer.locked ? 'not-allowed' : 'move',
+    touchAction: 'none',
+    userSelect: 'none',
+  };
+
+  const handlePointerDown = (e: React.PointerEvent, mode: DragMode) => {
+    if (layer.locked) return;
+    e.stopPropagation();
+    e.preventDefault();
+
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    selectLayer(layer.id);
+
+    dragRef.current = {
+      mode,
+      startX: e.clientX,
+      startY: e.clientY,
+      startTx: t.x,
+      startTy: t.y,
+      startW: t.width,
+      startH: t.height,
+    };
+  };
+
+  const handlePointerMove = (e: React.PointerEvent) => {
+    const ds = dragRef.current;
+    if (!ds) return;
+
+    const { sx, sy } = getScale();
+    const dx = (e.clientX - ds.startX) * sx;
+    const dy = (e.clientY - ds.startY) * sy;
+
+    if (ds.mode === 'move') {
+      updateTransform(layer.id, {
+        x: Math.round(ds.startTx + dx),
+        y: Math.round(ds.startTy + dy),
+      });
+    } else if (ds.mode === 'resize-br') {
+      updateTransform(layer.id, {
+        width: Math.max(20, Math.round(ds.startW + dx)),
+        height: Math.max(20, Math.round(ds.startH + dy)),
+      });
+    } else if (ds.mode === 'resize-tl') {
+      const newW = Math.max(20, Math.round(ds.startW - dx));
+      const newH = Math.max(20, Math.round(ds.startH - dy));
+      updateTransform(layer.id, {
+        x: Math.round(ds.startTx + (ds.startW - newW)),
+        y: Math.round(ds.startTy + (ds.startH - newH)),
+        width: newW,
+        height: newH,
+      });
+    }
+  };
+
+  const handlePointerUp = (e: React.PointerEvent) => {
+    dragRef.current = null;
+    try {
+      (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
+    } catch {
+      // ignore
+    }
+  };
 
   return (
     <div
-      onClick={onSelect}
-      className={`group flex items-center gap-2 border-b border-white/5 px-3 py-2 cursor-pointer transition-colors ${
-        selected ? 'bg-ashiro-500/15' : 'hover:bg-white/5'
-      }`}
+      style={style}
+      onPointerDown={(e) => handlePointerDown(e, 'move')}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerUp}
+      data-layer-id={layer.id}
     >
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          onToggleVisibility();
-        }}
-        className="text-ink-400 hover:text-white"
-        title="Visibilitas"
-      >
-        {layer.visible ? (
-          <Eye className="h-3.5 w-3.5" />
-        ) : (
-          <EyeOff className="h-3.5 w-3.5" />
-        )}
-      </button>
+      {isImageLayer(layer) && <ImageContent layer={layer} />}
+      {isShapeLayer(layer) && <ShapeContent layer={layer} />}
+      {isTextLayer(layer) && <TextContent layer={layer} />}
 
-      <div className="flex h-7 w-7 items-center justify-center rounded bg-white/5">
-        <Icon className="h-3.5 w-3.5 text-ink-300" />
-      </div>
+      {selected && (
+        <>
+          <div className="pointer-events-none absolute inset-0 border-2 border-neon-500" />
 
-      <span className="flex-1 truncate text-xs text-white">{layer.name}</span>
+          <div
+            onPointerDown={(e) => handlePointerDown(e, 'resize-tl')}
+            onPointerMove={handlePointerMove}
+            onPointerUp={handlePointerUp}
+            onPointerCancel={handlePointerUp}
+            className="absolute -left-2.5 -top-2.5 h-5 w-5 rounded-full border-2 border-white bg-neon-500"
+            style={{ cursor: 'nwse-resize', touchAction: 'none' }}
+          />
 
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          onToggleLock();
-        }}
-        className="text-ink-400 hover:text-white opacity-0 group-hover:opacity-100"
-        title="Kunci"
-      >
-        {layer.locked ? (
-          <Lock className="h-3.5 w-3.5" />
-        ) : (
-          <Unlock className="h-3.5 w-3.5" />
-        )}
-      </button>
-
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          onDelete();
-        }}
-        className="text-ink-400 hover:text-red-400 opacity-0 group-hover:opacity-100"
-        title="Hapus"
-      >
-        <Trash2 className="h-3.5 w-3.5" />
-      </button>
+          <div
+            onPointerDown={(e) => handlePointerDown(e, 'resize-br')}
+            onPointerMove={handlePointerMove}
+            onPointerUp={handlePointerUp}
+            onPointerCancel={handlePointerUp}
+            className="absolute -bottom-2.5 -right-2.5 h-5 w-5 rounded-full border-2 border-white bg-neon-500"
+            style={{ cursor: 'nwse-resize', touchAction: 'none' }}
+          />
+        </>
+      )}
     </div>
   );
 }
+
+function ImageContent({ layer }: { layer: ImageLayer }) {
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={layer.src}
+      alt={layer.name}
+      draggable={false}
+      style={{
+        width: '100%',
+        height: '100%',
+        objectFit: 'cover',
+        pointerEvents: 'none',
+      }}
+    />
+  );
+}
+
+function ShapeContent({ layer }: { layer: ShapeLayer }) {
+  const { shape, fill, stroke, strokeWidth, borderRadius } = layer;
+
+  const base: React.CSSProperties = {
+    width: '100%',
+    height: '100%',
+    background: fill,
+    border: stroke ? `${strokeWidth}px solid ${stroke}` : 'none',
+    pointerEvents: 'none',
+  };
+
+  if (shape === 'circle') {
+    return <div style={{ ...base, borderRadius: '50%' }} />;
+  }
+
+  if (shape === 'triangle') {
+    return (
+      <div
+        style={{
+          width: '100%',
+          height: '100%',
+          background: fill,
+          clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)',
+          pointerEvents: 'none',
+        }}
+      />
+    );
+  }
+
+  if (shape === 'star') {
+    return (
+      <div
+        style={{
+          width: '100%',
+          height: '100%',
+          background: fill,
+          clipPath:
+            'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)',
+          pointerEvents: 'none',
+        }}
+      />
+    );
+  }
+
+  if (shape === 'line') {
+    return (
+      <div
+        style={{
+          width: '100%',
+          height: strokeWidth || 4,
+          background: fill,
+          marginTop: '50%',
+          pointerEvents: 'none',
+        }}
+      />
+    );
+  }
+
+  return <div style={{ ...base, borderRadius }} />;
+}
+
+function TextContent({ layer }: { layer: TextLayer }) {
+  return (
+    <div
+      style={{
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent:
+          layer.align === 'center'
+            ? 'center'
+            : layer.align === 'right'
+            ? 'flex-end'
+            : 'flex-start',
+        color: layer.color,
+        fontSize: layer.fontSize,
+        fontWeight: layer.fontWeight,
+        fontFamily: layer.fontFamily,
+        lineHeight: layer.lineHeight,
+        textAlign: layer.align,
+        pointerEvents: 'none',
+        whiteSpace: 'pre-wrap',
+      }}
+    >
+      {layer.text}
+    </div>
+  );
+          }
