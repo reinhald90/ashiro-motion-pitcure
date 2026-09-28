@@ -1,0 +1,250 @@
+'use client';
+
+import { useRef } from 'react';
+import { useEditorStore } from '@/stores/editorStore';
+import type { Layer, ImageLayer, ShapeLayer, TextLayer } from '@/types/layer';
+import { isImageLayer, isShapeLayer, isTextLayer } from '@/types/layer';
+
+type DragMode = 'move' | 'resize-br' | 'resize-tl';
+
+interface Props {
+  layer: Layer;
+  selected: boolean;
+  getScale: () => { sx: number; sy: number };
+}
+
+export default function LayerView({ layer, selected, getScale }: Props) {
+  const selectLayer = useEditorStore((s) => s.selectLayer);
+  const updateTransform = useEditorStore((s) => s.updateTransform);
+
+  const dragRef = useRef<{
+    mode: DragMode;
+    startX: number;
+    startY: number;
+    startTx: number;
+    startTy: number;
+    startW: number;
+    startH: number;
+  } | null>(null);
+
+  const t = layer.transform;
+
+  const style: React.CSSProperties = {
+    position: 'absolute',
+    left: t.x,
+    top: t.y,
+    width: t.width,
+    height: t.height,
+    opacity: t.opacity,
+    transform: `rotate(${t.rotation}deg) scale(${t.scaleX}, ${t.scaleY})`,
+    transformOrigin: 'center center',
+    display: layer.visible ? 'block' : 'none',
+    cursor: layer.locked ? 'not-allowed' : 'move',
+    touchAction: 'none',
+    userSelect: 'none',
+  };
+
+  const handlePointerDown = (e: React.PointerEvent, mode: DragMode) => {
+    if (layer.locked) return;
+    e.stopPropagation();
+    e.preventDefault();
+
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    selectLayer(layer.id);
+
+    dragRef.current = {
+      mode,
+      startX: e.clientX,
+      startY: e.clientY,
+      startTx: t.x,
+      startTy: t.y,
+      startW: t.width,
+      startH: t.height,
+    };
+  };
+
+  const handlePointerMove = (e: React.PointerEvent) => {
+    const ds = dragRef.current;
+    if (!ds) return;
+
+    const { sx, sy } = getScale();
+    const dx = (e.clientX - ds.startX) * sx;
+    const dy = (e.clientY - ds.startY) * sy;
+
+    if (ds.mode === 'move') {
+      updateTransform(layer.id, {
+        x: Math.round(ds.startTx + dx),
+        y: Math.round(ds.startTy + dy),
+      });
+    } else if (ds.mode === 'resize-br') {
+      updateTransform(layer.id, {
+        width: Math.max(20, Math.round(ds.startW + dx)),
+        height: Math.max(20, Math.round(ds.startH + dy)),
+      });
+    } else if (ds.mode === 'resize-tl') {
+      const newW = Math.max(20, Math.round(ds.startW - dx));
+      const newH = Math.max(20, Math.round(ds.startH - dy));
+      updateTransform(layer.id, {
+        x: Math.round(ds.startTx + (ds.startW - newW)),
+        y: Math.round(ds.startTy + (ds.startH - newH)),
+        width: newW,
+        height: newH,
+      });
+    }
+  };
+
+  const handlePointerUp = (e: React.PointerEvent) => {
+    dragRef.current = null;
+    try {
+      (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
+    } catch {
+      // ignore
+    }
+  };
+
+  return (
+    <div
+      style={style}
+      onPointerDown={(e) => handlePointerDown(e, 'move')}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerUp}
+      data-layer-id={layer.id}
+    >
+      {isImageLayer(layer) && <ImageContent layer={layer} />}
+      {isShapeLayer(layer) && <ShapeContent layer={layer} />}
+      {isTextLayer(layer) && <TextContent layer={layer} />}
+
+      {selected && (
+        <>
+          <div className="pointer-events-none absolute inset-0 border-2 border-neon-500" />
+
+          <div
+            onPointerDown={(e) => handlePointerDown(e, 'resize-tl')}
+            onPointerMove={handlePointerMove}
+            onPointerUp={handlePointerUp}
+            onPointerCancel={handlePointerUp}
+            className="absolute -left-2.5 -top-2.5 h-5 w-5 rounded-full border-2 border-white bg-neon-500"
+            style={{ cursor: 'nwse-resize', touchAction: 'none' }}
+          />
+
+          <div
+            onPointerDown={(e) => handlePointerDown(e, 'resize-br')}
+            onPointerMove={handlePointerMove}
+            onPointerUp={handlePointerUp}
+            onPointerCancel={handlePointerUp}
+            className="absolute -bottom-2.5 -right-2.5 h-5 w-5 rounded-full border-2 border-white bg-neon-500"
+            style={{ cursor: 'nwse-resize', touchAction: 'none' }}
+          />
+        </>
+      )}
+    </div>
+  );
+}
+
+function ImageContent({ layer }: { layer: ImageLayer }) {
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={layer.src}
+      alt={layer.name}
+      draggable={false}
+      style={{
+        width: '100%',
+        height: '100%',
+        objectFit: 'cover',
+        pointerEvents: 'none',
+      }}
+    />
+  );
+}
+
+function ShapeContent({ layer }: { layer: ShapeLayer }) {
+  const { shape, fill, stroke, strokeWidth, borderRadius } = layer;
+
+  const base: React.CSSProperties = {
+    width: '100%',
+    height: '100%',
+    background: fill,
+    border: stroke ? `${strokeWidth}px solid ${stroke}` : 'none',
+    pointerEvents: 'none',
+  };
+
+  if (shape === 'circle') {
+    return <div style={{ ...base, borderRadius: '50%' }} />;
+  }
+
+  if (shape === 'triangle') {
+    return (
+      <div
+        style={{
+          width: '100%',
+          height: '100%',
+          background: fill,
+          clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)',
+          pointerEvents: 'none',
+        }}
+      />
+    );
+  }
+
+  if (shape === 'star') {
+    return (
+      <div
+        style={{
+          width: '100%',
+          height: '100%',
+          background: fill,
+          clipPath:
+            'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)',
+          pointerEvents: 'none',
+        }}
+      />
+    );
+  }
+
+  if (shape === 'line') {
+    return (
+      <div
+        style={{
+          width: '100%',
+          height: strokeWidth || 4,
+          background: fill,
+          marginTop: '50%',
+          pointerEvents: 'none',
+        }}
+      />
+    );
+  }
+
+  return <div style={{ ...base, borderRadius }} />;
+}
+
+function TextContent({ layer }: { layer: TextLayer }) {
+  return (
+    <div
+      style={{
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent:
+          layer.align === 'center'
+            ? 'center'
+            : layer.align === 'right'
+            ? 'flex-end'
+            : 'flex-start',
+        color: layer.color,
+        fontSize: layer.fontSize,
+        fontWeight: layer.fontWeight,
+        fontFamily: layer.fontFamily,
+        lineHeight: layer.lineHeight,
+        textAlign: layer.align,
+        pointerEvents: 'none',
+        whiteSpace: 'pre-wrap',
+      }}
+    >
+      {layer.text}
+    </div>
+  );
+}
