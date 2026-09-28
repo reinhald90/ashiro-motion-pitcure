@@ -11,9 +11,15 @@ interface Props {
   layer: Layer;
   selected: boolean;
   getScale: () => { sx: number; sy: number };
+  displayScale: number;
 }
 
-export default function LayerView({ layer, selected, getScale }: Props) {
+export default function LayerView({
+  layer,
+  selected,
+  getScale,
+  displayScale,
+}: Props) {
   const selectLayer = useEditorStore((s) => s.selectLayer);
   const updateTransform = useEditorStore((s) => s.updateTransform);
 
@@ -25,9 +31,16 @@ export default function LayerView({ layer, selected, getScale }: Props) {
     startTy: number;
     startW: number;
     startH: number;
+    sx: number;
+    sy: number;
   } | null>(null);
 
   const t = layer.transform;
+
+  // Handle size dalam koordinat logical, biar konsisten saat di-scale
+  const s = displayScale || 1;
+  const handleSize = Math.max(20, Math.round(22 / s));
+  const outlineWidth = Math.max(2, Math.round(2 / s));
 
   const style: React.CSSProperties = {
     position: 'absolute',
@@ -52,6 +65,7 @@ export default function LayerView({ layer, selected, getScale }: Props) {
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
     selectLayer(layer.id);
 
+    const { sx, sy } = getScale();
     dragRef.current = {
       mode,
       startX: e.clientX,
@@ -60,6 +74,8 @@ export default function LayerView({ layer, selected, getScale }: Props) {
       startTy: t.y,
       startW: t.width,
       startH: t.height,
+      sx,
+      sy,
     };
   };
 
@@ -67,9 +83,8 @@ export default function LayerView({ layer, selected, getScale }: Props) {
     const ds = dragRef.current;
     if (!ds) return;
 
-    const { sx, sy } = getScale();
-    const dx = (e.clientX - ds.startX) * sx;
-    const dy = (e.clientY - ds.startY) * sy;
+    const dx = (e.clientX - ds.startX) * ds.sx;
+    const dy = (e.clientY - ds.startY) * ds.sy;
 
     if (ds.mode === 'move') {
       updateTransform(layer.id, {
@@ -78,12 +93,12 @@ export default function LayerView({ layer, selected, getScale }: Props) {
       });
     } else if (ds.mode === 'resize-br') {
       updateTransform(layer.id, {
-        width: Math.max(20, Math.round(ds.startW + dx)),
-        height: Math.max(20, Math.round(ds.startH + dy)),
+        width: Math.max(10, Math.round(ds.startW + dx)),
+        height: Math.max(10, Math.round(ds.startH + dy)),
       });
     } else if (ds.mode === 'resize-tl') {
-      const newW = Math.max(20, Math.round(ds.startW - dx));
-      const newH = Math.max(20, Math.round(ds.startH - dy));
+      const newW = Math.max(10, Math.round(ds.startW - dx));
+      const newH = Math.max(10, Math.round(ds.startH - dy));
       updateTransform(layer.id, {
         x: Math.round(ds.startTx + (ds.startW - newW)),
         y: Math.round(ds.startTy + (ds.startH - newH)),
@@ -117,15 +132,26 @@ export default function LayerView({ layer, selected, getScale }: Props) {
 
       {selected && (
         <>
-          <div className="pointer-events-none absolute inset-0 border-2 border-neon-500" />
+          <div
+            className="pointer-events-none absolute inset-0 border-neon-500"
+            style={{ borderWidth: outlineWidth }}
+          />
 
           <div
             onPointerDown={(e) => handlePointerDown(e, 'resize-tl')}
             onPointerMove={handlePointerMove}
             onPointerUp={handlePointerUp}
             onPointerCancel={handlePointerUp}
-            className="absolute -left-2.5 -top-2.5 h-5 w-5 rounded-full border-2 border-white bg-neon-500"
-            style={{ cursor: 'nwse-resize', touchAction: 'none' }}
+            className="absolute rounded-full border-white bg-neon-500"
+            style={{
+              width: handleSize,
+              height: handleSize,
+              left: -handleSize / 2,
+              top: -handleSize / 2,
+              borderWidth: Math.max(2, outlineWidth),
+              cursor: 'nwse-resize',
+              touchAction: 'none',
+            }}
           />
 
           <div
@@ -133,8 +159,16 @@ export default function LayerView({ layer, selected, getScale }: Props) {
             onPointerMove={handlePointerMove}
             onPointerUp={handlePointerUp}
             onPointerCancel={handlePointerUp}
-            className="absolute -bottom-2.5 -right-2.5 h-5 w-5 rounded-full border-2 border-white bg-neon-500"
-            style={{ cursor: 'nwse-resize', touchAction: 'none' }}
+            className="absolute rounded-full border-white bg-neon-500"
+            style={{
+              width: handleSize,
+              height: handleSize,
+              right: -handleSize / 2,
+              bottom: -handleSize / 2,
+              borderWidth: Math.max(2, outlineWidth),
+              cursor: 'nwse-resize',
+              touchAction: 'none',
+            }}
           />
         </>
       )}
@@ -170,9 +204,7 @@ function ShapeContent({ layer }: { layer: ShapeLayer }) {
     pointerEvents: 'none',
   };
 
-  if (shape === 'circle') {
-    return <div style={{ ...base, borderRadius: '50%' }} />;
-  }
+  if (shape === 'circle') return <div style={{ ...base, borderRadius: '50%' }} />;
 
   if (shape === 'triangle') {
     return (
@@ -247,4 +279,4 @@ function TextContent({ layer }: { layer: TextLayer }) {
       {layer.text}
     </div>
   );
-}
+              }
