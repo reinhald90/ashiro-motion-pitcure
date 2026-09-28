@@ -4,6 +4,7 @@ import { useRef } from 'react';
 import { useEditorStore } from '@/stores/editorStore';
 import type { Layer, ImageLayer, ShapeLayer, TextLayer } from '@/types/layer';
 import { isImageLayer, isShapeLayer, isTextLayer } from '@/types/layer';
+import { evaluateLayerAtTime } from '@/lib/editor/keyframe';
 
 type DragMode = 'move' | 'resize-br' | 'resize-tl';
 
@@ -21,7 +22,8 @@ export default function LayerView({
   displayScale,
 }: Props) {
   const selectLayer = useEditorStore((s) => s.selectLayer);
-  const updateTransform = useEditorStore((s) => s.updateTransform);
+  const setLayerProp = useEditorStore((s) => s.setLayerProp);
+  const playhead = useEditorStore((s) => s.playhead);
 
   const dragRef = useRef<{
     mode: DragMode;
@@ -35,9 +37,9 @@ export default function LayerView({
     sy: number;
   } | null>(null);
 
-  const t = layer.transform;
+  // Evaluasi transform berdasarkan keyframe di playhead
+  const t = evaluateLayerAtTime(layer, playhead);
 
-  // Handle size dalam koordinat logical, biar konsisten saat di-scale
   const s = displayScale || 1;
   const handleSize = Math.max(20, Math.round(22 / s));
   const outlineWidth = Math.max(2, Math.round(2 / s));
@@ -61,7 +63,6 @@ export default function LayerView({
     if (layer.locked) return;
     e.stopPropagation();
     e.preventDefault();
-
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
     selectLayer(layer.id);
 
@@ -82,29 +83,22 @@ export default function LayerView({
   const handlePointerMove = (e: React.PointerEvent) => {
     const ds = dragRef.current;
     if (!ds) return;
-
     const dx = (e.clientX - ds.startX) * ds.sx;
     const dy = (e.clientY - ds.startY) * ds.sy;
 
     if (ds.mode === 'move') {
-      updateTransform(layer.id, {
-        x: Math.round(ds.startTx + dx),
-        y: Math.round(ds.startTy + dy),
-      });
+      setLayerProp(layer.id, 'x', Math.round(ds.startTx + dx));
+      setLayerProp(layer.id, 'y', Math.round(ds.startTy + dy));
     } else if (ds.mode === 'resize-br') {
-      updateTransform(layer.id, {
-        width: Math.max(10, Math.round(ds.startW + dx)),
-        height: Math.max(10, Math.round(ds.startH + dy)),
-      });
+      setLayerProp(layer.id, 'width', Math.max(10, Math.round(ds.startW + dx)));
+      setLayerProp(layer.id, 'height', Math.max(10, Math.round(ds.startH + dy)));
     } else if (ds.mode === 'resize-tl') {
       const newW = Math.max(10, Math.round(ds.startW - dx));
       const newH = Math.max(10, Math.round(ds.startH - dy));
-      updateTransform(layer.id, {
-        x: Math.round(ds.startTx + (ds.startW - newW)),
-        y: Math.round(ds.startTy + (ds.startH - newH)),
-        width: newW,
-        height: newH,
-      });
+      setLayerProp(layer.id, 'x', Math.round(ds.startTx + (ds.startW - newW)));
+      setLayerProp(layer.id, 'y', Math.round(ds.startTy + (ds.startH - newH)));
+      setLayerProp(layer.id, 'width', newW);
+      setLayerProp(layer.id, 'height', newH);
     }
   };
 
@@ -136,7 +130,6 @@ export default function LayerView({
             className="pointer-events-none absolute inset-0 border-neon-500"
             style={{ borderWidth: outlineWidth }}
           />
-
           <div
             onPointerDown={(e) => handlePointerDown(e, 'resize-tl')}
             onPointerMove={handlePointerMove}
@@ -153,7 +146,6 @@ export default function LayerView({
               touchAction: 'none',
             }}
           />
-
           <div
             onPointerDown={(e) => handlePointerDown(e, 'resize-br')}
             onPointerMove={handlePointerMove}
@@ -195,7 +187,6 @@ function ImageContent({ layer }: { layer: ImageLayer }) {
 
 function ShapeContent({ layer }: { layer: ShapeLayer }) {
   const { shape, fill, stroke, strokeWidth, borderRadius } = layer;
-
   const base: React.CSSProperties = {
     width: '100%',
     height: '100%',
@@ -203,9 +194,7 @@ function ShapeContent({ layer }: { layer: ShapeLayer }) {
     border: stroke ? `${strokeWidth}px solid ${stroke}` : 'none',
     pointerEvents: 'none',
   };
-
   if (shape === 'circle') return <div style={{ ...base, borderRadius: '50%' }} />;
-
   if (shape === 'triangle') {
     return (
       <div
@@ -219,7 +208,6 @@ function ShapeContent({ layer }: { layer: ShapeLayer }) {
       />
     );
   }
-
   if (shape === 'star') {
     return (
       <div
@@ -234,7 +222,6 @@ function ShapeContent({ layer }: { layer: ShapeLayer }) {
       />
     );
   }
-
   if (shape === 'line') {
     return (
       <div
@@ -248,7 +235,6 @@ function ShapeContent({ layer }: { layer: ShapeLayer }) {
       />
     );
   }
-
   return <div style={{ ...base, borderRadius }} />;
 }
 
@@ -279,4 +265,4 @@ function TextContent({ layer }: { layer: TextLayer }) {
       {layer.text}
     </div>
   );
-              }
+}
