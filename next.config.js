@@ -1,14 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // ============================================
-  // React & Rendering
-  // ============================================
   reactStrictMode: true,
   swcMinify: true,
 
-  // ============================================
-  // Image Optimization
-  // ============================================
   images: {
     remotePatterns: [
       {
@@ -25,9 +19,6 @@ const nextConfig = {
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
 
-  // ============================================
-  // Headers (keamanan + WebAssembly untuk ffmpeg.wasm)
-  // ============================================
   async headers() {
     return [
       {
@@ -38,7 +29,6 @@ const nextConfig = {
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
         ],
       },
-      // Wajib untuk ffmpeg.wasm & WebCodecs nanti
       {
         source: '/editor/:path*',
         headers: [
@@ -49,9 +39,6 @@ const nextConfig = {
     ];
   },
 
-  // ============================================
-  // Redirect
-  // ============================================
   async redirects() {
     return [
       {
@@ -67,17 +54,12 @@ const nextConfig = {
     ];
   },
 
-  // ============================================
-  // Webpack customization
-  // ============================================
   webpack: (config, { isServer }) => {
-    // Dukung import file .wgsl (WebGL shader) nanti
     config.module.rules.push({
       test: /\.(wgsl|glsl|vert|frag)$/,
       type: 'asset/source',
     });
 
-    // Fallback untuk modul Node di browser (ffmpeg.wasm)
     if (!isServer) {
       config.resolve.fallback = {
         ...config.resolve.fallback,
@@ -90,25 +72,15 @@ const nextConfig = {
     return config;
   },
 
-  // ============================================
-  // Eksperimental
-  // ============================================
   experimental: {
-    // Web Worker langsung dari folder workers/
     serverActions: {
       bodySizeLimit: '10mb',
     },
   },
 
-  // ============================================
-  // Output
-  // ============================================
   poweredByHeader: false,
   compress: true,
 
-  // ============================================
-  // Environment variables (client-side exposure)
-  // ============================================
   env: {
     NEXT_PUBLIC_APP_NAME: 'Ashiro Motion Picture',
     NEXT_PUBLIC_APP_VERSION: '0.1.0',
